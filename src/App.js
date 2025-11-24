@@ -1,9 +1,58 @@
 import { useState } from "react";
 import AddQuest from "./AddQuest";
 import QuestsList from "./QuestsList";
+import status from "daisyui/components/status";
 
 function App() {
-  const [quests, setQuests] = useState([]);
+  const localQuests = JSON.parse(window.localStorage.getItem("quests")) || [];
+  const [quests, setQuests] = useState(localQuests);
+
+  const concludedQuests = quests.filter(
+    (quest) => quest.status === "concluído"
+  );
+  const notConcludedQuests = quests.filter(
+    (quest) => quest.status === "aberto"
+  );
+
+  function saveEditQuest(quest, title) {
+    let auxQuests = quests;
+    const editedQuest = {
+      id: quest.id,
+      title: title || quest.title,
+      status: quest.status,
+      created_at: quest.created_at,
+    };
+
+    const findQuestPosition = auxQuests.findIndex(
+      (quest) => quest.id === editedQuest.id
+    );
+
+    auxQuests.splice(findQuestPosition, 1, editedQuest);
+
+    localStorage.setItem("quests", JSON.stringify(auxQuests));
+
+    getQuests();
+  }
+
+  function saveConcludedQuest(quest) {
+    let auxQuests = quests;
+    const editedQuest = {
+      id: quest.id,
+      title: quest.title,
+      status: "concluído",
+      created_at: quest.created_at,
+    };
+
+    const findQuestPosition = auxQuests.findIndex(
+      (quest) => quest.id === editedQuest.id
+    );
+
+    auxQuests.splice(findQuestPosition, 1, editedQuest);
+
+    localStorage.setItem("quests", JSON.stringify(auxQuests));
+
+    getQuests();
+  }
 
   function saveAddQuest(title) {
     //console.log(title);
@@ -17,7 +66,7 @@ function App() {
       id: id,
       title: title,
       status: "aberto",
-      create_at: new Date(Date.now()).toUTCString(),
+      created_at: new Date(Date.now()).toUTCString(),
     };
     auxQuests.push(createdQuest);
     localStorage.setItem("quests",JSON.stringify(auxQuests));
@@ -28,7 +77,6 @@ function App() {
     setQuests(JSON.parse(window.localStorage.getItem("quests")));
   }
   
-
   return (
     <div className="flex h-screen justify-center items-center">
       <div className="card w-[80%] lg:w-[50%] h-[70%] shadow-md rounded-sm transform ease-out duration-300 items-center p-10 gap-5">
@@ -36,7 +84,24 @@ function App() {
           Quests To Do
         </h1>
         <AddQuest saveAddQuest={saveAddQuest}/>
-        <QuestsList quests={quests}/>
+
+        <div className="flex flex-col gap-4 w-full items-center">
+          <h2>Abertas</h2>
+          <QuestsList 
+            quests={quests}
+            saveEditQuest={saveEditQuest}
+            saveConcludedQuest={saveConcludedQuest}
+          />
+        </div>
+
+        <div className="flex flex-col gap-4 w-full items-center">
+          <h2>Concluídas</h2>
+          <QuestsList 
+            quests={quests}
+            saveEditQuest={saveEditQuest}
+            saveConcludedQuest={saveConcludedQuest}
+          />
+        </div>
       </div>
     </div>
   );

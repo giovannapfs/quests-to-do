@@ -1,8 +1,17 @@
+import QuestItem from "./QuestItem";
+
 export default function QuestsList(props) {
     return (
         <div className="flex flex-col overflow-y-auto gap-6 w-[80%]">
             {props.quests.map((quest) => {
-                return <p key={quest.id}>{quest.title}</p>
+                return (
+                    <QuestItem
+                        key={quest.id}
+                        quest={quest}
+                        saveEditQuest={props.saveEditQuest}
+                        saveConcludedQuest={props.saveConcludedQuest}
+                    />
+                );
             })}
         </div>
     );
